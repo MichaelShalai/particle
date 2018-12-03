@@ -1,0 +1,26 @@
+runtime: nodejs
+env: flex
+
+# This sample incurs costs to run on the App Engine flexible environment. 
+# The settings below are to reduce costs during testing and are not appropriate
+# for production use. For more information, see:
+# https://cloud.google.com/appengine/docs/flexible/nodejs/configuring-your-app-with-app-yaml
+# manual_scaling:
+#   instances: 1
+# resources:
+#   cpu: 0.1
+#   memory_gb: 0.5
+#   disk_size_gb: 0.1
+
+health_check:
+  enable_health_check: True
+  check_interval_sec: 10
+  timeout_sec: 8
+  unhealthy_threshold: 3
+  healthy_threshold: 2
+
+automatic_scaling:
+  min_num_instances: 1
+  max_num_instances: 1
+  cpu_utilization:
+    target_utilization: 0.2
