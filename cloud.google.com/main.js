@@ -1,3 +1,5 @@
+// https://cloud.google.com/appengine/docs/flexible/nodejs/runtime
+
 const colors = require('colors')
 const util = require('util')
 const {PubSub} = require('@google-cloud/pubsub')
