@@ -9,7 +9,7 @@ int tmp36 = A0; // This is where your tmp36 is plugged in. The other side goes t
 int dht11 = D1; // This is where your dht11 is plugged in. The other side goes to the "power" pin (below).
 
 int power_tmp36 = A5; // This is the other end of your tmp36. The other side is plugged into the "tmp36" pin (above).
-int power_dht11 = A4; // This is the other end of your tmp36. The other side is plugged into the "tmp36" pin (above).
+int power_dht11 = A4; // This is the other end of your dht11. The other side is plugged into the "tmp36" pin (above).
 // The reason we have plugged one side into an analog pin instead of to "power" is because we want a very steady voltage to be sent to the tmp36.
 // That way, when we read the value from the other side of the tmp36, we can accurately calculate a voltage drop.
 
@@ -23,13 +23,6 @@ int dht11_f; // Particle variable for Fahrenheit temperature from dht11.
 
 // Humidity / Temperature sensor reference
 DHT dht(dht11, DHT11);
-
-// pushingbox.com configuration
-String serverName = "api.pushingbox.com";
-String deviceId = "v3164D7B13527772";
-
-// Client used to send EMails
-TCPClient client;
 
 void setup() {
 
@@ -57,7 +50,6 @@ void setup() {
 
     // We are also going to declare a Spark.function so that we can turn the LED on and off from the cloud.
     Particle.function("led", ledToggle);
-    Particle.function("m", mail);
     // This is saying that when we ask the cloud for the function "led", it will employ the function ledToggle() from this app.
 }
 
@@ -92,26 +84,6 @@ void loop() {
 
     String json = "{\"c\":" + String(dht11_c) + ", \"h\":" + String(dht11_h) + "}";
     Particle.publish("JSON", json, EVENT_TTL, PRIVATE);
-}
-
-int mail(String command) {
-  client.stop();
-  if (client.connect(serverName, 80)) {
-    String url = "/pushingbox?devid=" + deviceId;
-    url += "&h=" + String(dht11_h);
-    url += "&c=" + String(dht11_c);
-    url +="&f=" + String(dht11_f);
-    Particle.publish("EMail", "Sending email: " + url, EVENT_TTL, PRIVATE);
-    client.println("GET " + url + " HTTP/1.1");
-    client.println("Host: " + serverName);
-    client.println("User-Agent: Particle");
-    client.println();
-    client.flush();
-    return 1;
-  } else {
-    Particle.publish("Error", "Can't connect to server: " + serverName, EVENT_TTL, PRIVATE);
-    return -1;
-  }
 }
 
 int ledToggle(String command) {

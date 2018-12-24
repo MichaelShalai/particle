@@ -1,26 +1,36 @@
-runtime: nodejs
-env: flex
+runtime: nodejs10
 
-# This sample incurs costs to run on the App Engine flexible environment. 
-# The settings below are to reduce costs during testing and are not appropriate
-# for production use. For more information, see:
-# https://cloud.google.com/appengine/docs/flexible/nodejs/configuring-your-app-with-app-yaml
-# manual_scaling:
-#   instances: 1
-# resources:
-#   cpu: 0.1
-#   memory_gb: 0.5
-#   disk_size_gb: 0.1
+# Health checks are enabled by default.
+# https://cloud.google.com/appengine/docs/flexible/python/reference/app-yaml#updated_health_checks
+# TODO: consider adding 'readiness checks'.
+liveness_check:
+  path: "/liveness_check"
+  check_interval_sec: 60
+  timeout_sec: 4
+  failure_threshold: 2
+  success_threshold: 2
 
-health_check:
-  enable_health_check: True
-  check_interval_sec: 10
-  timeout_sec: 8
-  unhealthy_threshold: 3
-  healthy_threshold: 2
+readiness_check:
+  path: "/readiness_check"
+  check_interval_sec: 5
+  timeout_sec: 4
+  failure_threshold: 2
+  success_threshold: 2
+  app_start_timeout_sec: 300
 
-automatic_scaling:
-  min_num_instances: 1
-  max_num_instances: 1
-  cpu_utilization:
-    target_utilization: 0.2
+# Scaling is automatic.
+# https://cloud.google.com/appengine/docs/standard/nodejs/config/appref#scaling_elements
+# automatic_scaling:
+#   min_num_instances: 1
+#   max_num_instances: 1
+#   min_idle_instances: 0
+#   # max_concurrent_requests: 5 # (10: 5 .. 80)
+#   target_cpu_utilization: 0.95 # (0.6: 0.5 .. 0.95)
+#   target_throughput_utilization: 0.95 # (0.6: 0.5 .. 0.95)
+
+# Web request handlers.
+handlers:
+- url: /.*
+  secure: always
+  redirect_http_response_code: 301
+  script: auto
