@@ -6,7 +6,7 @@ const gcloudConfig = require('./config.js');
 console.log(colors.magenta('Authenticating PubSub with Google Cloud...'))
 const pubsub = new PubSub({
   projectId: gcloudConfig.projectId,
-  // keyFilename: config.gcpServiceAccountKeyFilePath,
+  keyFilename: gcloudConfig.serviceAccountKeyFilePath,
 })
 console.log(colors.magenta('Authentication successful!'))
 

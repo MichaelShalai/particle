@@ -1,0 +1,115 @@
+<html>
+  <head>
+    <!--Load the AJAX API-->
+    <script type="text/javascript" src="https://www.gstatic.com/charts/loader.js"></script>
+    <script type="text/javascript" src="//ajax.googleapis.com/ajax/libs/jquery/1.10.2/jquery.min.js"></script>
+    <script type="text/javascript">
+      function initChart() {
+        // Load the Visualization API and the piechart package.
+        google.charts.load('current', {'packages':['corechart', 'line']});
+
+        // Set a callback to run when the Google Visualization API is loaded.
+        google.charts.setOnLoadCallback(drawChart);
+
+        document.getElementById('chart_div').style.display = 'block';
+      }
+
+      // Callback that creates and populates a data table, 
+      // instantiates the pie chart, passes in the data and
+      // draws it.
+      function drawChart() {
+        var user = firebase.auth().currentUser;
+        user.getIdToken().then(function (id_token) {
+          var jsonData = $.ajax({
+            url: "/data",
+            dataType: "json",
+            async: false,
+            data: {
+              id_token: id_token
+            }
+          }).responseText;
+
+          // Create our data table out of JSON data loaded from server.
+          var data = new google.visualization.DataTable(jsonData);
+
+          // Set chart options
+          var options = {
+            title: 'Telemetry',
+            width: 800,
+            height: 600,
+            curveType: 'function',
+            legend: { position: 'bottom' }
+          };
+
+          // Instantiate and draw our chart, passing in some options.
+          var chart = new google.visualization.LineChart(document.getElementById('chart_div'));
+          chart.draw(data, options);
+
+          // Material:
+          // var chart = new google.charts.Line(document.getElementById('chart_div'));
+          // chart.draw(data, google.charts.Line.convertOptions(options));
+        });
+      }
+    </script>
+
+
+    <script src="https://www.gstatic.com/firebasejs/5.7.0/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/5.7.0/firebase-auth.js"></script>
+    <script src="https://cdn.firebase.com/libs/firebaseui/3.1.1/firebaseui.js"></script>
+    <link type="text/css" rel="stylesheet" href="https://cdn.firebase.com/libs/firebaseui/3.1.1/firebaseui.css" />
+    <script>
+      var config = {
+        apiKey: "AIzaSyCpdduwL4dHKmafhFOvPTtikVy24VniFYE",
+        authDomain: "smart-home-226503.firebaseapp.com",
+      };
+      firebase.initializeApp(config);
+
+      var uiConfig = {
+        signInOptions: [
+          firebase.auth.GoogleAuthProvider.PROVIDER_ID
+        ],
+        signInFlow: 'popup',
+        // scopes: [
+        //   'https://www.googleapis.com/auth/userinfo.email',
+        //   'https://www.googleapis.com/auth/userinfo.profile',
+        //   'https://www.googleapis.com/auth/plus.me'
+        // ],
+        // customParameters: {
+        //   // Forces account selection even when one account
+        //   // is available.
+        //   prompt: 'select_account'
+        // },
+        callbacks: {
+          signInSuccessWithAuthResult: function(authResult, redirectUrl) {
+            // User successfully signed in.
+            initChart();
+
+            // Return type determines whether we continue the redirect automatically
+            // or whether we leave that to developer to handle.
+            return false;
+          },
+          uiShown: function() {
+            // The widget is rendered.
+            // Hide the loader.
+            document.getElementById('loader').style.display = 'none';
+          }
+        },
+      };
+
+      // For debugging:
+      // firebase.auth().setPersistence(firebase.auth.Auth.Persistence.NONE)
+      firebase.auth().setPersistence(firebase.auth.Auth.Persistence.LOCAL)
+        .then(function() {
+          // Initialize the FirebaseUI Widget using Firebase.
+          var ui = new firebaseui.auth.AuthUI(firebase.auth());
+          ui.start('#firebaseui-auth-container', uiConfig);
+        });
+    </script>
+  </head>
+
+  <body>
+    <div id="firebaseui-auth-container"></div>
+    <div id="loader">Loading authentication...</div>
+    <div id="chart_div" style="width:800; height:600; display: none;">Loading chart...</div>
+  </body>
+</html>

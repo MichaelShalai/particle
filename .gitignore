@@ -1,4 +1,4 @@
-key.json
+keys/
 *.bin
 node_modules
 package-lock.json
