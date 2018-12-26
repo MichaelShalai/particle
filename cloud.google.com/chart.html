@@ -4,6 +4,10 @@
     <script type="text/javascript" src="https://www.gstatic.com/charts/loader.js"></script>
     <script type="text/javascript" src="//ajax.googleapis.com/ajax/libs/jquery/1.10.2/jquery.min.js"></script>
     <script type="text/javascript">
+      function setStatus(message) {
+        document.getElementById('status').innerHTML = message;
+      }
+
       function initChart() {
         // Load the Visualization API and the piechart package.
         google.charts.load('current', {'packages':['corechart', 'line']});
@@ -20,6 +24,7 @@
       function drawChart() {
         var user = firebase.auth().currentUser;
         user.getIdToken().then(function (id_token) {
+          setStatus('Loading data...');
           var jsonData = $.ajax({
             url: "/data",
             dataType: "json",
@@ -27,10 +32,14 @@
             data: {
               id_token: id_token
             }
-          }).responseText;
+          });
+          if (jsonData.responseJSON.error != null) {
+            setStatus(jsonData.responseJSON.error);
+            return;
+          }
 
           // Create our data table out of JSON data loaded from server.
-          var data = new google.visualization.DataTable(jsonData);
+          var data = new google.visualization.DataTable(jsonData.responseText);
 
           // Set chart options
           var options = {
@@ -41,6 +50,8 @@
             legend: { position: 'bottom' }
           };
 
+          setStatus('Rendering chart...');
+
           // Instantiate and draw our chart, passing in some options.
           var chart = new google.visualization.LineChart(document.getElementById('chart_div'));
           chart.draw(data, options);
@@ -48,6 +59,8 @@
           // Material:
           // var chart = new google.charts.Line(document.getElementById('chart_div'));
           // chart.draw(data, google.charts.Line.convertOptions(options));
+
+          setStatus('');
         });
       }
     </script>
@@ -69,16 +82,6 @@
           firebase.auth.GoogleAuthProvider.PROVIDER_ID
         ],
         signInFlow: 'popup',
-        // scopes: [
-        //   'https://www.googleapis.com/auth/userinfo.email',
-        //   'https://www.googleapis.com/auth/userinfo.profile',
-        //   'https://www.googleapis.com/auth/plus.me'
-        // ],
-        // customParameters: {
-        //   // Forces account selection even when one account
-        //   // is available.
-        //   prompt: 'select_account'
-        // },
         callbacks: {
           signInSuccessWithAuthResult: function(authResult, redirectUrl) {
             // User successfully signed in.
@@ -91,7 +94,7 @@
           uiShown: function() {
             // The widget is rendered.
             // Hide the loader.
-            document.getElementById('loader').style.display = 'none';
+            setStatus('');
           }
         },
       };
@@ -109,7 +112,7 @@
 
   <body>
     <div id="firebaseui-auth-container"></div>
-    <div id="loader">Loading authentication...</div>
-    <div id="chart_div" style="width:800; height:600; display: none;">Loading chart...</div>
+    <div id="status">Loading authentication...</div>
+    <div id="chart_div" style="width:800; height:600; display: none;">Loading data...</div>
   </body>
 </html>

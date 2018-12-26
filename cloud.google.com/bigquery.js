@@ -1,13 +1,13 @@
 const {BigQuery} = require('@google-cloud/bigquery');
 const colors = require('colors')
-const gcloudConfig = require('./config.js');
+const {gcloudConfig} = require('./config.js');
 
 const tableInsertOptions = { raw: true };
 
 /* Wrap all interactions with BigQuery in this helper class */
 class MyBigQuery {
 	constructor() {
-		console.log(colors.magenta('Initializing BigQuery with Google Cloud...'))
+		process.stdout.write(colors.magenta('Initializing BigQuery with Google Cloud... '))
 		this._api = new BigQuery({
 		  projectId: gcloudConfig.projectId,
 		  keyFilename: gcloudConfig.serviceAccountKeyFilePath,
@@ -18,7 +18,7 @@ class MyBigQuery {
 		  .dataset(gcloudConfig.bigqueryDatasetId)
 		  .table(gcloudConfig.bigqueryTableId);
 
-		console.log(colors.magenta('Initializing successful!'))
+		console.log(colors.magenta('done!'))
 	}
 
 	insert(row) {
